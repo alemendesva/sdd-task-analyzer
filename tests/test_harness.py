@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from src.task_analyzer import analyze_tasks, TaskValidationError
 
@@ -52,6 +54,20 @@ def test_calculo_metricas_cenario_sucesso(cenario_valido_mix_tarefas):
     assert resultado["tempo_medio_conclusao_por_prioridade"]["media"] == 6.0
     assert resultado["tempo_medio_conclusao_por_prioridade"]["baixa"] == 0.0
     assert "taxa_atraso_percentual" in resultado
+
+
+def test_taxa_atraso_pendente_ainda_no_prazo(cenario_valido_mix_tarefas):
+    """Com referência antes do vencimento da pendente, só a tarefa 2 está atrasada (1/3)."""
+    resultado = analyze_tasks(cenario_valido_mix_tarefas, reference_now=datetime(2026, 10, 5, 12, 0, 0))
+
+    assert resultado["taxa_atraso_percentual"] == 33.33
+
+
+def test_taxa_atraso_pendente_vencida(cenario_valido_mix_tarefas):
+    """Com referência após o vencimento da pendente, as tarefas 2 e 3 estão atrasadas (2/3)."""
+    resultado = analyze_tasks(cenario_valido_mix_tarefas, reference_now=datetime(2026, 10, 15, 12, 0, 0))
+
+    assert resultado["taxa_atraso_percentual"] == 66.67
 
 
 # --- TESTES DE VALIDAÇÃO E TRATAMENTO DE ERROS (EXCEÇÕES) ---

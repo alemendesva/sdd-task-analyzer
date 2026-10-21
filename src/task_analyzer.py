@@ -200,11 +200,15 @@ def _calculate_average_hours_by_priority(completed_tasks: list[_ParsedTask]) -> 
     }
 
 
-def analyze_tasks(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+def analyze_tasks(
+    tasks: list[dict[str, Any]], reference_now: datetime | None = None
+) -> dict[str, Any]:
     """Processa uma lista de tarefas e gera um relatório consolidado de métricas.
 
     Args:
         tasks: Lista de dicionários, onde cada dicionário representa uma tarefa.
+        reference_now: Data/hora de referência para avaliar o atraso de tarefas
+            pendentes. Se None, usa a data/hora atual.
 
     Returns:
         Dicionário contendo as seguintes métricas:
@@ -231,7 +235,7 @@ def analyze_tasks(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     tempo_medio_geral = _calculate_average_completion_hours(completed_tasks)
     tempo_medio_prioridade = _calculate_average_hours_by_priority(completed_tasks)
 
-    delayed_count = sum(1 for t in parsed_tasks if _is_task_delayed(t))
+    delayed_count = sum(1 for t in parsed_tasks if _is_task_delayed(t, reference_now))
 
     if total_tarefas == 0:
         taxa_atraso = 0.0
